@@ -7,6 +7,7 @@
 --
 
 local Class = require('Module:Class')
+local Logic = require('Module:Logic')
 local Lua = require('Module:Lua')
 local RoleOf = require('Module:RoleOf')
 local String = require('Module:StringUtils')
@@ -14,10 +15,19 @@ local Template = require('Module:Template')
 local Variables = require('Module:Variables')
 
 local Injector = Lua.import('Module:Infobox/Widget/Injector', {requireDevIfEnabled = true})
+local Region = Lua.import('Module:Region', {requireDevIfEnabled = true})
 local Team = Lua.import('Module:Infobox/Team', {requireDevIfEnabled = true})
 
 local Widgets = require('Module:Infobox/Widget/All')
 local Cell = Widgets.Cell
+
+local REGION_REMAPPINGS = {
+	['south america'] = 'latin america',
+	['asia-pacific'] = 'pacific',
+	['asia'] = 'pacific',
+	['taiwan'] = 'pacific',
+	['southeast asia'] = 'pacific',
+}
 
 ---@class LeagueoflegendsInfoboxTeam: InfoboxTeam
 local CustomTeam = Class.new(Team)
@@ -35,6 +45,21 @@ function CustomTeam.run(frame)
 	team.args.captain = RoleOf.get{role = 'Captain'}
 
 	return team:createInfobox()
+end
+
+---@param region string?
+---@return {display: string?, region: string?}
+function CustomTeam:createRegion(region)
+	if Logic.isEmpty(region) then return {} end
+
+	local regionData = Region.run{region = region} or {}
+
+	local remappedRegion = REGION_REMAPPINGS[regionData.region:lower()]
+	if remappedRegion then
+		return self:createRegion(remappedRegion)
+	end
+
+	return regionData
 end
 
 ---@return string?
@@ -62,8 +87,6 @@ end
 ---@param args table
 ---@return table
 function CustomTeam:addToLpdb(lpdbData, args)
-	lpdbData.region = Variables.varDefault('region', '')
-
 	if String.isNotEmpty(args.league) then
 		lpdbData.extradata.competesin = string.upper(args.league)
 	end
