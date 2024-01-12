@@ -13,8 +13,8 @@ local PlacementStats = require('Module:InfoboxPlacementStats')
 local RoleOf = require('Module:RoleOf')
 local Template = require('Module:Template')
 
-local Region = Lua.import('Module:Region', {requireDevIfEnabled = true})
-local Team = Lua.import('Module:Infobox/Team', {requireDevIfEnabled = true})
+local Region = Lua.import('Module:Region')
+local Team = Lua.import('Module:Infobox/Team')
 
 local REGION_REMAPPINGS = {
 	['latin america'] = 'south america',
